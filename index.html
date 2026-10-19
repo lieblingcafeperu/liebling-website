@@ -1609,10 +1609,17 @@ Looking forward to your confirmation to arrange payment and delivery. Thank you!
   $$('.count').forEach(c => { c.dataset.v = c.textContent; c.textContent = c.textContent.replace(/\d+/, '0'); });
   function countUp(el) {
     const m = (el.dataset.v || el.textContent).match(/(\d+)(\D*)/); if (!m) return;
-    const end = +m[1], suf = m[2] || '', steps = 38; let i = 0;
+    const end = +m[1], suf = m[2] || '', dur = 1800, t0 = performance.now();
     const fmt = n => end >= 1000 ? n.toLocaleString('en-US') : n;
-    const t = setInterval(() => { i++; el.textContent = fmt(Math.min(end, Math.round(end / steps * i))) + suf; if (i >= steps) clearInterval(t); }, 24);
+    cancelAnimationFrame(el._raf);
+    const tick = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);   // easeOutCubic
+      el.textContent = fmt(Math.round(end * e)) + suf;
+      if (p < 1) el._raf = requestAnimationFrame(tick);
+    };
+    el._raf = requestAnimationFrame(tick);
   }
+
 
   function check() {
     const trigger = innerHeight * 0.88;
@@ -1622,7 +1629,13 @@ Looking forward to your confirmation to arrange payment and delivery. Thank you!
         if (el.style.transitionDelay) setTimeout(() => { el.style.transitionDelay = ''; }, 1400);
       }
     });
-    $$('.count:not([data-done])').forEach(c => { const r = c.getBoundingClientRect(); if (r.top < innerHeight * 0.9 && r.bottom > 0) { c.dataset.done = 1; countUp(c); } });
+    $$('.count').forEach(c => {
+      const r = c.getBoundingClientRect();
+      if (!c.dataset.done && r.top < innerHeight * 0.75 && r.bottom > innerHeight * 0.1) { c.dataset.done = 1; countUp(c); }
+      else if (c.dataset.done && (r.top > innerHeight || r.bottom < 0)) {   // aus dem Bild: zurück auf 0, zählt beim nächsten Mal neu
+        delete c.dataset.done; cancelAnimationFrame(c._raf); c.textContent = (c.dataset.v || '').replace(/\d+/, '0');
+      }
+    });
     const hero = $('.hero'); if (!hero.classList.contains('in') && hero.getBoundingClientRect().top < innerHeight * 0.75) hero.classList.add('in');
     $$('.mark:not(.in)').forEach(el => { if (el.getBoundingClientRect().top < innerHeight * 0.8) el.classList.add('in'); });
   }
