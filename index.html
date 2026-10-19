@@ -749,7 +749,9 @@ p { margin: 0 0 1.1em; }
   .brand-mark, .brand-mark img { transition: none; }
   .stage-bg, .stage-hint i { animation: none; }
   .stage-micro p { animation: none; opacity: 1; }
-  .rays, .badge svg, .hero-bag, .marquee, .ring2, .brew-teaser svg.deco, .scroll-hint i { animation: none; }
+  .scroll-hint i { animation: none; }
+  /* Sanfte Endlos-Bewegungen (Sonne, Siegel, Tüte, Laufband) bleiben, nur langsamer */
+  .rays { animation-duration: 90s; } .badge svg { animation-duration: 36s; } .hero-bag { animation-duration: 10s; }
   .rot .w { animation: none; } .rot .w:nth-child(2) { opacity: 1; }
   .meter i.on::after { transform: scaleX(1); transition: none; }
 }
