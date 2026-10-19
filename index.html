@@ -1596,8 +1596,10 @@ Looking forward to your confirmation to arrange payment and delivery. Thank you!
   });
   $$('.coffee-media .frame, .origin-banner').forEach(el => el.classList.add('reveal-img'));
 
+  /* Zahlen starten bei 0 und zählen erst hoch, wenn sie selbst sichtbar werden */
+  $$('.count').forEach(c => { c.dataset.v = c.textContent; c.textContent = c.textContent.replace(/\d+/, '0'); });
   function countUp(el) {
-    const m = el.textContent.match(/(\d+)(\D*)/); if (!m) return;
+    const m = (el.dataset.v || el.textContent).match(/(\d+)(\D*)/); if (!m) return;
     const end = +m[1], suf = m[2] || '', steps = 38; let i = 0;
     const fmt = n => end >= 1000 ? n.toLocaleString('en-US') : n;
     const t = setInterval(() => { i++; el.textContent = fmt(Math.min(end, Math.round(end / steps * i))) + suf; if (i >= steps) clearInterval(t); }, 24);
@@ -1609,9 +1611,9 @@ Looking forward to your confirmation to arrange payment and delivery. Thank you!
       if (el.getBoundingClientRect().top < trigger) {
         el.classList.add('in');
         if (el.style.transitionDelay) setTimeout(() => { el.style.transitionDelay = ''; }, 1400);
-        $$('.count', el).forEach(c => { if (!c.dataset.done) { c.dataset.done = 1; countUp(c); } });
       }
     });
+    $$('.count:not([data-done])').forEach(c => { const r = c.getBoundingClientRect(); if (r.top < innerHeight * 0.9 && r.bottom > 0) { c.dataset.done = 1; countUp(c); } });
     const hero = $('.hero'); if (!hero.classList.contains('in') && hero.getBoundingClientRect().top < innerHeight * 0.75) hero.classList.add('in');
     $$('.mark:not(.in)').forEach(el => { if (el.getBoundingClientRect().top < innerHeight * 0.8) el.classList.add('in'); });
   }
